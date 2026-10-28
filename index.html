@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026/27 Alpine Ski Review Hub & Guide</title>
+  <style>
+    :root {
+      --bg-main: #0f172a;
+      --bg-card: #1e293b;
+      --bg-modal: #1e293b;
+      --accent-blue: #38bdf8;
+      --accent-hover: #0284c7;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --tag-east: #0284c7;
+      --tag-alps: #10b981;
+      --tag-race: #d97706;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg-main); color: var(--text-main); line-height: 1.6; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 30px; padding: 20px 0; border-bottom: 1px solid var(--border-color); }
+    header h1 { font-size: 2.2rem; color: var(--text-main); margin-bottom: 8px; }
+    header p { color: var(--text-muted); font-size: 1rem; }
+
+    /* Controls & Filters */
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .filter-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .btn { background: #0f172a; color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: 500; transition: all 0.2s ease; }
+    .btn:hover, .btn.active { background: var(--accent-blue); color: #0f172a; border-color: var(--accent-blue); }
+    .search-input { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 16px; border-radius: 20px; width: 250px; outline: none; }
+    .search-input:focus { border-color: var(--accent-blue); }
+
+    /* Ski Grid */
+    .ski-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .ski-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; }
+    .ski-card:hover { transform: translateY(-4px); border-color: var(--accent-blue); }
+    
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .brand-name { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+    .ski-title { font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
+    .category-badge { font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; color: #fff; font-weight: 600; text-transform: uppercase; }
+    .badge-east { background: var(--tag-east); }
+    .badge-alps { background: var(--tag-alps); }
+    .badge-race { background: var(--tag-race); }
+
+    .card-body p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); pt: 12px; margin-top: 12px; font-size: 0.85rem; }
+    .waist-tag { font-weight: 600; color: var(--accent-blue); }
+    .sources-count { color: var(--text-muted); }
+
+    /* Modal Styling */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+    .modal-content { background: var(--bg-modal); border: 1px solid var(--border-color); border-radius: 16px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 30px; position: relative; }
+    .close-btn { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text-muted); font-size: 1.8rem; cursor: pointer; }
+    .close-btn:hover { color: var(--text-main); }
+
+    .modal-title-area { margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+    .modal-title { font-size: 1.8rem; color: var(--text-main); }
+    .modal-subtitle { color: var(--accent-blue); font-weight: 600; }
+
+    .specs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .spec-item { font-size: 0.9rem; }
+    .spec-label { color: var(--text-muted); font-size: 0.8rem; display: block; }
+    .spec-value { color: var(--text-main); font-weight: 600; }
+
+    .review-section { margin-bottom: 20px; }
+    .review-section h3 { font-size: 1.1rem; color: var(--accent-blue); margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
+    .pro-con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+    .pro-box, .con-box { padding: 12px; border-radius: 8px; font-size: 0.9rem; }
+    .pro-box { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .con-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .pro-box h4 { color: #10b981; margin-bottom: 5px; }
+    .con-box h4 { color: #ef4444; margin-bottom: 5px; }
+
+    .sources-list { font-size: 0.85rem; color: var(--text-muted); background: #0f172a; padding: 10px 15px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>2026/27 Alpine Ski Review Hub</h1>
+    <p>Grounded Multi-Source Reviews & Specs Across 15 Global Publishers</p>
+  </header>
+
+  <div class="controls">
+    <div class="filter-buttons">
+      <button class="btn active" onclick="filterSkis('all')">All Skis</button>
+      <button class="btn" onclick="filterSkis('east')">1) East Coast (Icy/Hard Snow)</button>
+      <button class="btn" onclick="filterSkis('alps')">2) Alps & Rockies (All-Mountain)</button>
+      <button class="btn" onclick="filterSkis('race')">3) Fast & Advanced Skiers</button>
+    </div>
+    <input type="text" class="search-input" id="searchInput" placeholder="Search ski model or brand..." onkeyup="searchSkis()">
+  </div>
+
+  <div class="ski-grid" id="skiGrid"></div>
+</div>
+
+<!-- Interactive Modal -->
+<div class="modal-overlay" id="skiModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal()">&times;</button>
+    <div class="modal-title-area">
+      <span class="brand-name" id="modalBrand">BRAND</span>
+      <h2 class="modal-title" id="modalTitle">Ski Model</h2>
+      <span class="modal-subtitle" id="modalCategory">Category</span>
+    </div>
+
+    <div class="specs-grid" id="modalSpecs"></div>
+
+    <div class="review-section">
+      <h3>Aggregated Review Synthesis</h3>
+      <p id="modalReview"></p>
+    </div>
+
+    <div class="pro-con-grid">
+      <div class="pro-box">
+        <h4>Strengths</h4>
+        <p id="modalPros"></p>
+      </div>
+      <div class="con-box">
+        <h4>Weaknesses</h4>
+        <p id="modalCons"></p>
+      </div>
+    </div>
+
+    <div class="review-section">
+      <h3>Best Terrain & Skier Profile</h3>
+      <p id="modalBestFor"></p>
+    </div>
+
+    <div class="sources-list" id="modalSources"></div>
+  </div>
+</div>
+
+<script>
+  // Source-grounded dataset for the three key ski categories
+  const skisData = [
+    // --- CATEGORY 3: FAST & ADVANCED SKIERS ---
+    {
+      id: "hero-master-lt-r22",
+      brand: "Rossignol",
+      model: "Hero Master LT R22",
+      categoryKey: "race",
+      categoryName: "Race GS Pro / High-Speed Charger",
+      waist: "67 mm",
+      shortDesc: "World Cup level Master GS charger built with the R22 race plate and LCT tech.",
+      core: "Beech Wood Core",
+      titanaL: "Full Titanal Sandwich",
+      interface: "World Cup R22 Race Plate",
+      radius: "17m / 19m / 21m",
+      aggregatedReview: "Evaluated in NeveItalia's Race Carve Gigante Pro category as a benchmark Master GS race carver. Test outlets highlight its unyielding high-speed edge grip, zero-vibration tracking on morning ice, and incredible leverage out of long-radius turns.",
+      pros: "World Cup level edge hold, rock-solid stability at speed, explosive rebound out of turns.",
+      cons: "Demands aggressive forward posture; heavy physical build; unforgiving at slow cruising speeds.",
+      bestFor: "Master racers, former racers, and expert pilots on hardpack groomers.",
+      sources: "Tested by NeveItalia, InTheSnow, Pick-a-ski, and SKIMAGAZIN (2025/26 test)."
+    },
+    {
+      id: "wcr-erace-pro",
+      brand: "Head",
+      model: "Worldcup Rebels e-Race Pro",
+      categoryKey: "race",
+      categoryName: "Race Carve Pro",
+      waist: "68 mm",
+      shortDesc: "Award-winning race carver featuring active EMC piezoelectric vibration damping.",
+      core: "Graphene / Wood Sandwich Core",
+      titanaL: "Full Titanal",
+      interface: "Race Plate EVO 14",
+      radius: "14.4 m (170cm)",
+      aggregatedReview: "Chosen as the overall Race Category Winner in the Snow Society / Snowplaza Ski Test and awarded Best Men's Piste Ski by InTheSnow. Reviewers praise its active EMC technology for filtering chatter while keeping edges locked into hard snow.",
+      pros: "Class-leading high-speed edge bite, ultra-damp chatter-free ride, precise turn entry.",
+      cons: "Stiff tail punishes backward body bias; strictly zero soft-snow versatility.",
+      bestFor: "Advanced to expert skiers seeking high-speed carving precision.",
+      sources: "Tested by Snow Society / Snowplaza, InTheSnow, NeveItalia, and SKIMAGAZIN (2025/26 test)."
+    },
+    {
+      id: "redster-s9-revoshock",
+      brand: "Atomic",
+      model: "Redster S9 Revoshock S",
+      categoryKey: "race",
+      categoryName: "Race SL Carver",
+      waist: "68 mm",
+      shortDesc: "Slalom race carver with active Revoshock S spring-steel modules.",
+      core: "Power Woodcore (Ash/Poplar)",
+      titanaL: "Ultra Titanium Powered",
+      interface: "Active Flex Interface",
+      radius: "12.5 m (165cm)",
+      aggregatedReview: "Named the Race SL Category Winner at the World Ski Test according to Schneehoehen.de (2025/26 test). Reviewers applaud its rapid edge-to-edge agility, intense acceleration out of short-radius slalom turns, and damp feel on ice.",
+      pros: "Instant turn initiation, spring-loaded acceleration out of turns, damp hardpack tracking.",
+      cons: "Requires active physical input; fatigues the skier if unengaged; single-radius focus.",
+      bestFor: "Expert slalom enthusiasts and hardpack carvers.",
+      sources: "Tested by Schneehoehen.de (2025/26 test), NeveItalia, SkiEssentials, and SKIMAGAZIN (2025/26 test)."
+    },
+    {
+      id: "rc4-noize-pro",
+      brand: "Fischer",
+      model: "RC4 Noize ST Pro / LT Pro",
+      categoryKey: "race",
+      categoryName: "Race SL / GS Pro",
+      waist: "66 mm",
+      shortDesc: "Expert race charger with World Cup M-Plate and Noize Control technology.",
+      core: "Beech / Poplar Woodcore",
+      titanaL: "Shaped Titanal 0.8mm",
+      interface: "World Cup M-Plate",
+      radius: "13m (ST Pro) / 18m (LT Pro)",
+      aggregatedReview: "Awarded Best Carving Ski of 2026 by SKI Magazine and named an expert 'Coup de cœur' pick in Mon Séjour en Montagne (2025/26 test). Tested in NeveItalia's top-tier Race Pro categories for its damp ice grip and M-Plate leverage.",
+      pros: "Incredible edge bite on steep ice, chatter-free stability, World Cup plate power.",
+      cons: "Unforgiving tail if backseat; requires expert technique and forward drive.",
+      bestFor: "Expert racers and hardpack carving specialists.",
+      sources: "Tested by SKI Magazine, NeveItalia, SkiEssentials, and Mon Séjour en Montagne (2025/26 test)."
+    },
+    {
+      id: "racetiger-gs-master",
+      brand: "Völkl",
+      model: "Racetiger GS Master",
+      categoryKey: "race",
+      categoryName: "Master GS Carver",
+      waist: "67 mm",
+      shortDesc: "High-performance Master GS carver engineered with tailored carbon tips.",
+      core: "World Cup Ash Woodcore",
+      titanaL: "Full Titanal",
+      interface: "Marker WorldCup Plate",
+      radius: "17.5 m (178cm)",
+      aggregatedReview: "Evaluated in NeveItalia and SKI EXPERTS (2025/26 test) as a top-tier Master GS race ski. Praised for its laser-focused tracking, precise carbon tip initiation, and damp stability at top speeds.",
+      pros: "Smooth, vibration-free high-speed tracking, crisp tip engagement, relentless grip.",
+      cons: "Requires high speed to flex properly; narrow platform offers zero off-piste utility.",
+      bestFor: "Master racers and high-speed GS carvers.",
+      sources: "Tested by NeveItalia, SKI EXPERTS (2025/26 test), and Snow-Online."
+    },
+
+    // --- CATEGORY 1: BEST FOR EAST COAST ---
+    {
+      id: "mantra-88",
+      brand: "Völkl",
+      model: "Mantra 88",
+      categoryKey: "east",
+      categoryName: "Frontside / All-Mountain",
+      waist: "88 mm",
+      shortDesc: "Benchmark mid-80s frontside charger with Tailored Titanal Frame.",
+      core: "Multilayer Woodcore",
+      titanaL: "Tailored Titanal Frame",
+      interface: "Flat (Binding optional)",
+      radius: "3D Radius Sidecut",
+      aggregatedReview: "Reviewed across 6 independent publications as a top frontside choice. Testers note its unmatched versatility on firm eastern groomers, crisp edge engagement, and rock-solid vibration damping.",
+      pros: "Exceptional edge bite on hardpack, versatile multi-turn capability, damp feel.",
+      cons: "Stiffer flex profile requires an active driver; less float in deep snow.",
+      bestFor: "Advanced skiers seeking firm snow power and all-piste control.",
+      sources: "Tested by SKI Magazine, SkiEssentials, Christy Sports, Blister, InTheSnow, and Powder7."
+    },
+    {
+      id: "anomaly-88",
+      brand: "Blizzard",
+      model: "Anomaly 88",
+      categoryKey: "east",
+      categoryName: "Frontside Charger",
+      waist: "88 mm",
+      shortDesc: "High-speed frontside carver with TrueBlend Woodcore and Ti construction.",
+      core: "TrueBlend All-Mountain Woodcore",
+      titanaL: "Double Titanal",
+      interface: "Flat",
+      radius: "15.5 m (176cm)",
+      aggregatedReview: "Evaluated across 5 publications as a flagship frontside charger. Testers highlight its damp vibration absorption on hardpack and predictable, locked-in carving arc.",
+      pros: "Smooth and damp high-speed tracking, strong tail support, superb ice grip.",
+      cons: "Demands speed to unlock energy; heavy construction.",
+      bestFor: "Aggressive frontside carvers and eastern hardpack skiers.",
+      sources: "Tested by SKI Magazine, SkiEssentials, Christy Sports, Blister, and Snow-Online (2025/26 test)."
+    },
+    {
+      id: "arcade-88",
+      brand: "Rossignol",
+      model: "Arcade 88",
+      categoryKey: "east",
+      categoryName: "Frontside All-Piste",
+      waist: "88 mm",
+      shortDesc: "All-piste carver blending race tech sidecut with VAS damping.",
+      core: "Poplar PEFC Wood Core",
+      titanaL: "Titanal Beam",
+      interface: "Flat / Konect",
+      radius: "15 m (178cm)",
+      aggregatedReview: "Tested across 5 publications for its frontside edge control. *(Note: Women's Arcade 88 W is tracked as a separate model in SKI Magazine).* Reviewers praise its smooth initiation and dependable grip on frozen groomers.",
+      pros: "Smooth turn initiation, solid hardpack grip, versatile turn radius.",
+      cons: "Can feel damp or muted at lower speeds.",
+      bestFor: "Advanced frontside skiers on firm groomers.",
+      sources: "Tested by SKI Magazine, SkiEssentials, Powder7, SKIMAGAZIN (2025/26 test), and OutdoorGearLab (2025/26 test)."
+    },
+    {
+      id: "enforcer-89",
+      brand: "Nordica",
+      model: "Enforcer 89",
+      categoryKey: "east",
+      categoryName: "Frontside / All-Mountain",
+      waist: "89 mm",
+      shortDesc: "All-mountain benchmark with dual Titanal layers and energetic core.",
+      core: "Performance Wood Core",
+      titanaL: "2x Full Titanal",
+      interface: "Flat",
+      radius: "17.5 m (179cm)",
+      aggregatedReview: "Named a 'Coup de cœur' pick in Mon Séjour en Montagne (2025/26 test). Reviewers praise its ability to bust through eastern crud and hold an edge on hard snow.",
+      pros: "Powerful edge hold, incredible crud-busting stability, energetic rebound.",
+      cons: "Heavier physical feel; demands proper technique.",
+      bestFor: "Advanced to expert skiers tackling variable eastern conditions.",
+      sources: "Tested by SKI Magazine, SkiEssentials, and Mon Séjour en Montagne (2025/26 test)."
+    },
+
+    // --- CATEGORY 2: BEST FOR ALPS & ROCKIES ---
+    {
+      id: "m7-mantra",
+      brand: "Völkl",
+      model: "M7 Mantra",
+      categoryKey: "alps",
+      categoryName: "All-Mountain Freeride",
+      waist: "96 mm",
+      shortDesc: "Premier 11-source all-mountain charger with 3D Radius Sidecut.",
+      core: "Multilayer Woodcore",
+      titanaL: "Tailored Titanal Frame",
+      interface: "Flat",
+      radius: "3D Radius Sidecut",
+      aggregatedReview: "Covered across 11 independent publications as a premier all-mountain charger. *(Note: Women's M7 Mantra W is tracked separately in OutdoorGearLab (2025/26 test)).* Universally praised for its high-speed stability, variable snow float, and precision.",
+      pros: "Unmatched high-speed charger, versatile 3D radius, excellent stability in crud.",
+      cons: "Stiff flex profile requires an energetic pilot; heavy build.",
+      bestFor: "Expert all-mountain skiers in the Rockies and Alps.",
+      sources: "Tested by SKI, SkiEss, Christy, Blister (2025/26 test), InTheSnow, NeveItalia, FREESKIER, Powder7, Snow-Online (2025/26 test), SKIMAGAZIN (2025/26 test), and OGL (2025/26 test)."
+    },
+    {
+      id: "canvas-108",
+      brand: "Blizzard",
+      model: "Canvas 108",
+      categoryKey: "alps",
+      categoryName: "Freeride / Big Mountain",
+      waist: "108 mm",
+      shortDesc: "Big-mountain freeride charger engineered for deep snow and high speeds.",
+      core: "Freeride Woodcore",
+      titanaL: "Titanal Layering",
+      interface: "Flat",
+      radius: "19 m (182cm)",
+      aggregatedReview: "Reviewed across 6 independent publications as a flagship freeride ski. Testers highlight its incredible flotation in deep powder and rock-solid tracking through wind-buffed Alpine bowls.",
+      pros: "Superb powder float, rock-solid stability in crud and choppy snow, confident stance.",
+      cons: "Wide waist limits quickness on narrow icy cat tracks.",
+      bestFor: "Freeride enthusiasts and big-mountain skiers.",
+      sources: "Tested by SkiEssentials, Christy Sports, Fall-Line, NeveItalia, FREESKIER, and Powder7."
+    },
+    {
+      id: "mindbender-101",
+      brand: "K2",
+      model: "Mindbender 101",
+      categoryKey: "alps",
+      categoryName: "All-Mountain Freeride",
+      waist: "101 mm",
+      shortDesc: "Versatile big-mountain ski built with Y-Beam Titanal construction.",
+      core: "Aspen Veneer Core",
+      titanaL: "Titanal Y-Beam",
+      interface: "Flat",
+      radius: "18 m (179cm)",
+      aggregatedReview: "Evaluated across 6 publications for big-mountain versatility. *(Note: Women's Mindbender 101 W is tracked separately in SKI Magazine and FREESKIER).* Praised for blending edge hold with intuitive pivotability in soft snow.",
+      pros: "Intuitive turn initiation, great float in soft snow, strong tail stability.",
+      cons: "Can feel heavy in tight timber.",
+      bestFor: "All-mountain freeriders exploring Alpine and Rocky Mountain terrain.",
+      sources: "Tested by SKI Magazine, SkiEssentials, Christy Sports, NeveItalia, FREESKIER, and Powder7."
+    },
+    {
+      id: "qst-106",
+      brand: "Salomon",
+      model: "QST 106",
+      categoryKey: "alps",
+      categoryName: "Freeride Powder",
+      waist: "106 mm",
+      shortDesc: "Playful freeride benchmark built with C/FX carbon & flax backbone.",
+      core: "Full Poplar Woodcore",
+      titanaL: "C/FX Carbon/Flax & Ti Insert",
+      interface: "Flat",
+      radius: "19 m (181cm)",
+      aggregatedReview: "Tested across 5 publications as a soft-snow freeride benchmark. Reviewers applaud its playful surfy flotation, damp carbon-flax feel, and maneuverability through Alpine off-piste terrain.",
+      pros: "Playful flotation in powder, damp chatter reduction, easy steering in trees.",
+      cons: "Lacks the ultimate hardpack ice bite of narrower race carvers.",
+      bestFor: "Freeride skiers looking for soft-snow versatility in deep mountain terrain.",
+      sources: "Tested by SKI Magazine, SkiEssentials, FREESKIER, Powder7, and Snow-Online (2025/26 test)."
+    }
+  ];
+
+  // Render Ski Cards
+  function renderSkis(data) {
+    const grid = document.getElementById('skiGrid');
+    grid.innerHTML = '';
+    
+    data.forEach(ski => {
+      let badgeClass = 'badge-east';
+      if(ski.categoryKey === 'alps') badgeClass = 'badge-alps';
+      if(ski.categoryKey === 'race') badgeClass = 'badge-race';
+
+      const card = document.createElement('div');
+      card.className = 'ski-card';
+      card.onclick = () => openModal(ski.id);
+
+      card.innerHTML = `
+        <div>
+          <div class="card-header">
+            <span class="brand-name">${ski.brand}</span>
+            <span class="category-badge ${badgeClass}">${ski.categoryKey}</span>
+          </div>
+          <h3 class="ski-title">${ski.model}</h3>
+          <p class="card-body">${ski.shortDesc}</p>
+        </div>
+        <div class="card-footer">
+          <span class="waist-tag">Waist: ${ski.waist}</span>
+          <span class="sources-count">Click for Review & Specs</span>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // Filter Function
+  function filterSkis(category) {
+    document.querySelectorAll('.filter-buttons .btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (category === 'all') {
+      renderSkis(skisData);
+    } else {
+      const filtered = skisData.filter(s => s.categoryKey === category);
+      renderSkis(filtered);
+    }
+  }
+
+  // Search Function
+  function searchSkis() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = skisData.filter(s => 
+      s.model.toLowerCase().includes(query) || 
+      s.brand.toLowerCase().includes(query) ||
+      s.categoryName.toLowerCase().includes(query)
+    );
+    renderSkis(filtered);
+  }
+
+  // Open Modal with Full Ski Info
+  function openModal(id) {
+    const ski = skisData.find(s => s.id === id);
+    if (!ski) return;
+
+    document.getElementById('modalBrand').innerText = ski.brand;
+    document.getElementById('modalTitle').innerText = ski.model;
+    document.getElementById('modalCategory').innerText = ski.categoryName;
+
+    document.getElementById('modalSpecs').innerHTML = `
+      <div class="spec-item"><span class="spec-label">Waist Width</span><span class="spec-value">${ski.waist}</span></div>
+      <div class="spec-item"><span class="spec-label">Wood Core</span><span class="spec-value">${ski.core}</span></div>
+      <div class="spec-item"><span class="spec-label">Titanal / Metal</span><span class="spec-value">${ski.titanaL}</span></div>
+      <div class="spec-item"><span class="spec-label">Plate / System</span><span class="spec-value">${ski.interface}</span></div>
+      <div class="spec-item"><span class="spec-label">Turn Radius</span><span class="spec-value">${ski.radius}</span></div>
+    `;
+
+    document.getElementById('modalReview').innerText = ski.aggregatedReview;
+    document.getElementById('modalPros').innerText = ski.pros;
+    document.getElementById('modalCons').innerText = ski.cons;
+    document.getElementById('modalBestFor').innerText = ski.bestFor;
+    document.getElementById('modalSources').innerText = "Publisher Coverage: " + ski.sources;
+
+    document.getElementById('skiModal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('skiModal').style.display = 'none';
+  }
+
+  // Close modal on click outside
+  window.onclick = function(event) {
+    const modal = document.getElementById('skiModal');
+    if (event.target === modal) {
+      closeModal();
+    }
+  }
+
+  // Initial Load
+  renderSkis(skisData);
+</script>
+
+</body>
+</html>
